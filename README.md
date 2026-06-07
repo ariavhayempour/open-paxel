@@ -33,6 +33,32 @@ irm https://astral.sh/uv/install.ps1 | iex
 
 ## Install
 
+### pip (standard Python)
+
+From PyPI (when published):
+
+```bash
+pip install open-paxel
+```
+
+From a clone of this repo:
+
+```bash
+git clone https://github.com/staru09/open-paxel.git
+cd open-paxel
+
+# Build the dashboard UI once (required for `open-paxel serve`)
+cd frontend && npm install && npm run build && cd ..
+
+pip install .
+# editable / developer install:
+pip install -e ".[dev]"
+```
+
+After install, the `open-paxel` command is on your PATH.
+
+### uv (recommended for development)
+
 From the repo root:
 
 ```bash

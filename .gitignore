@@ -11,6 +11,6 @@ build/
 .ruff_cache/
 node_modules/
 frontend/dist/
-brain_dump/static/assets/
-brain_dump/static/index.html
+open_paxel/static/assets/
+open_paxel/static/index.html
 .DS_Store

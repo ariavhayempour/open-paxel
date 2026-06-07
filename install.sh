@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Brain Dump installer"
+echo "Open-Paxel installer"
 echo "===================="
 
 if ! command -v uv &>/dev/null; then
@@ -18,19 +18,19 @@ echo "Creating .venv and installing dependencies with uv..."
 uv sync --all-groups
 
 echo ""
-echo "Installed brain-dump CLI into .venv"
+echo "Installed open-paxel CLI into .venv"
 echo ""
 echo "Activate the environment:"
 echo "  source .venv/bin/activate   # Linux/macOS"
 echo "  .venv\\Scripts\\activate     # Windows"
 echo ""
 echo "Or run commands via uv:"
-echo "  uv run brain-dump discover"
+echo "  uv run open-paxel discover"
 echo ""
 echo "Next steps:"
-echo "  1. uv run brain-dump init-config"
-echo "  2. uv run brain-dump discover"
-echo "  3. uv run brain-dump upload -y"
-echo "  4. uv run brain-dump profile --open"
+echo "  1. uv run open-paxel init-config"
+echo "  2. uv run open-paxel discover"
+echo "  3. uv run open-paxel upload -y"
+echo "  4. uv run open-paxel profile --open"
 echo ""
 echo "Optional: claude --plugin-dir ./plugin"

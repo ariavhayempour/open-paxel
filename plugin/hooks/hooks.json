@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "brain-dump analyze --transcript-from-stdin --async",
+            "command": "open-paxel analyze --transcript-from-stdin --async",
             "timeout": 30
           }
         ]

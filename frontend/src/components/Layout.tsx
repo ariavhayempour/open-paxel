@@ -15,7 +15,7 @@ export function Layout() {
       <header className="border-b-2 border-ink bg-card px-6 py-4">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
           <div>
-            <h1 className="font-display text-2xl font-bold tracking-tight">Brain Dump</h1>
+            <h1 className="font-display text-2xl font-bold tracking-tight">Open-Paxel</h1>
             <p className="text-sm opacity-70">How do you build with AI?</p>
           </div>
           <nav className="flex gap-2">

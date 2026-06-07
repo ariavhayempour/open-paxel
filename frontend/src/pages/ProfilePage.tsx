@@ -61,7 +61,7 @@ function EmptyState() {
             Uploads
           </Link>{" "}
           page, or run{" "}
-          <code className="rounded bg-cream-dark px-1">brain-dump upload</code> in your terminal.
+          <code className="rounded bg-cream-dark px-1">open-paxel upload</code> in your terminal.
         </p>
       </div>
     </div>

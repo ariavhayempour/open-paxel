@@ -1,7 +1,7 @@
-# Brain Dump installer (Windows)
+# Open-Paxel installer (Windows)
 $ErrorActionPreference = "Stop"
 
-Write-Host "Brain Dump installer"
+Write-Host "Open-Paxel installer"
 Write-Host "===================="
 
 if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
@@ -16,16 +16,16 @@ Write-Host "Creating .venv and installing dependencies with uv..."
 uv sync --all-groups
 
 Write-Host ""
-Write-Host "Installed brain-dump CLI into .venv"
+Write-Host "Installed open-paxel CLI into .venv"
 Write-Host ""
 Write-Host "Activate the environment:"
 Write-Host "  .venv\Scripts\Activate.ps1"
 Write-Host ""
 Write-Host "Or run commands via uv:"
-Write-Host "  uv run brain-dump discover"
+Write-Host "  uv run open-paxel discover"
 Write-Host ""
 Write-Host "Next steps:"
-Write-Host "  1. uv run brain-dump init-config"
-Write-Host "  2. uv run brain-dump discover"
-Write-Host "  3. uv run brain-dump upload -y"
-Write-Host "  4. uv run brain-dump profile --open"
+Write-Host "  1. uv run open-paxel init-config"
+Write-Host "  2. uv run open-paxel discover"
+Write-Host "  3. uv run open-paxel upload -y"
+Write-Host "  4. uv run open-paxel profile --open"

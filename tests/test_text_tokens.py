@@ -1,5 +1,5 @@
-from brain_dump.text.document_scan import scan_document
-from brain_dump.text.tokens import divide_into_chunks, estimate_tokens, sliding_windows
+from open_paxel.text.document_scan import scan_document
+from open_paxel.text.tokens import divide_into_chunks, estimate_tokens, sliding_windows
 
 
 def test_estimate_tokens():

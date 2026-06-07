@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchActiveJobs, fetchJob, type ProcessingJob } from "../lib/api";
 
-const ACTIVE_JOB_KEY = "brain-dump-active-job-id";
+const ACTIVE_JOB_KEY = "open-paxel-active-job-id";
 
 export function getStoredJobId(): string | null {
   try {

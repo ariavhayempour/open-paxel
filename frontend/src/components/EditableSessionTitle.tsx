@@ -73,7 +73,7 @@ export function EditableSessionTitle({
         />
         {mutation.isError && (
           <p className="mt-1 text-xs text-cozy-red">
-            Rename failed — restart the backend (<code>uv run brain-dump serve</code>) and try again.
+            Rename failed — restart the backend (<code>uv run open-paxel serve</code>) and try again.
           </p>
         )}
       </div>

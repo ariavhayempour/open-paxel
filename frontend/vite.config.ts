@@ -5,7 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
-    outDir: "../brain_dump/static",
+    outDir: "../open_paxel/static",
     emptyOutDir: true,
   },
   server: {

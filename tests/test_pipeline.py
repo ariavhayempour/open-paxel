@@ -1,10 +1,10 @@
 import pytest
 
-from brain_dump.config import Settings
-from brain_dump.db.repository import SQLiteRepository
-from brain_dump.models.domain import DimensionScore, SessionScore
-from brain_dump.pipeline import AnalysisPipeline
-from brain_dump.scorer.openai_scorer import OpenAIScorer
+from open_paxel.config import Settings
+from open_paxel.db.repository import SQLiteRepository
+from open_paxel.models.domain import DimensionScore, SessionScore
+from open_paxel.pipeline import AnalysisPipeline
+from open_paxel.scorer.openai_scorer import OpenAIScorer
 
 
 class MockScorer:

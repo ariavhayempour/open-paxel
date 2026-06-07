@@ -53,60 +53,6 @@ wheels = [
 ]
 
 [[package]]
-name = "brain-dump"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "fastapi" },
-    { name = "httpx" },
-    { name = "openai" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "python-dotenv" },
-    { name = "python-multipart" },
-    { name = "rich" },
-    { name = "sqlalchemy" },
-    { name = "typer" },
-    { name = "uvicorn", extra = ["standard"] },
-]
-
-[package.optional-dependencies]
-anthropic = [
-    { name = "anthropic" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "anthropic", marker = "extra == 'anthropic'", specifier = ">=0.40" },
-    { name = "fastapi", specifier = ">=0.115" },
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "openai", specifier = ">=1.50" },
-    { name = "pydantic", specifier = ">=2.0" },
-    { name = "pydantic-settings", specifier = ">=2.0" },
-    { name = "python-dotenv", specifier = ">=1.0" },
-    { name = "python-multipart", specifier = ">=0.0.9" },
-    { name = "rich", specifier = ">=13.0" },
-    { name = "sqlalchemy", specifier = ">=2.0" },
-    { name = "typer", specifier = ">=0.12" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.32" },
-]
-provides-extras = ["anthropic"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=8.0" },
-    { name = "pytest-asyncio", specifier = ">=0.24" },
-    { name = "ruff", specifier = ">=0.8" },
-]
-
-[[package]]
 name = "certifi"
 version = "2026.5.20"
 source = { registry = "https://pypi.org/simple" }
@@ -446,6 +392,60 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba", size = 8729 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8", size = 9979 },
+]
+
+[[package]]
+name = "open-paxel"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "fastapi" },
+    { name = "httpx" },
+    { name = "openai" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "python-dotenv" },
+    { name = "python-multipart" },
+    { name = "rich" },
+    { name = "sqlalchemy" },
+    { name = "typer" },
+    { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.optional-dependencies]
+anthropic = [
+    { name = "anthropic" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anthropic", marker = "extra == 'anthropic'", specifier = ">=0.40" },
+    { name = "fastapi", specifier = ">=0.115" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "openai", specifier = ">=1.50" },
+    { name = "pydantic", specifier = ">=2.0" },
+    { name = "pydantic-settings", specifier = ">=2.0" },
+    { name = "python-dotenv", specifier = ">=1.0" },
+    { name = "python-multipart", specifier = ">=0.0.9" },
+    { name = "rich", specifier = ">=13.0" },
+    { name = "sqlalchemy", specifier = ">=2.0" },
+    { name = "typer", specifier = ">=0.12" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.32" },
+]
+provides-extras = ["anthropic"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=8.0" },
+    { name = "pytest-asyncio", specifier = ">=0.24" },
+    { name = "ruff", specifier = ">=0.8" },
 ]
 
 [[package]]

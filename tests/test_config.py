@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from brain_dump.config import Settings, load_env_files, project_root
+from open_paxel.config import Settings, load_env_files, project_root
 
 
 def test_load_env_file(tmp_path, monkeypatch):
@@ -8,7 +8,7 @@ def test_load_env_file(tmp_path, monkeypatch):
     env_file.write_text('OPENAI_API_KEY="sk-test-from-env-file"\n', encoding="utf-8")
 
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    monkeypatch.setattr("brain_dump.config.env_file_paths", lambda: [env_file])
+    monkeypatch.setattr("open_paxel.config.env_file_paths", lambda: [env_file])
 
     load_env_files()
     settings = Settings.load()
@@ -24,7 +24,7 @@ def test_env_overrides_toml(tmp_path, monkeypatch):
     home.mkdir()
     (home / "config.toml").write_text('openai_api_key = "sk-from-toml"\n', encoding="utf-8")
 
-    monkeypatch.setattr("brain_dump.config.load_env_files", lambda **_: [])
+    monkeypatch.setattr("open_paxel.config.load_env_files", lambda **_: [])
 
     settings = Settings.load()
     assert settings.resolve_api_key() == "sk-from-shell"

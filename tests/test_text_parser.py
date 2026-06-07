@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from brain_dump.parser.auto import AutoTranscriptParser
-from brain_dump.parser.text_session import TextSessionParser
+from open_paxel.parser.auto import AutoTranscriptParser
+from open_paxel.parser.text_session import TextSessionParser
 
 
 FIXTURE_MD = Path(__file__).parent / "fixtures" / "sample_session.md"

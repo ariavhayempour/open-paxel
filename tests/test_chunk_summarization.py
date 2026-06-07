@@ -1,10 +1,10 @@
 import pytest
 
-from brain_dump.metrics.heuristics import compute_heuristics
-from brain_dump.parser.text_session import TextSessionParser
-from brain_dump.redact.excerpts import build_excerpts
-from brain_dump.scorer.openai_scorer import OpenAIScorer
-from brain_dump.text.tokens import divide_into_chunks
+from open_paxel.metrics.heuristics import compute_heuristics
+from open_paxel.parser.text_session import TextSessionParser
+from open_paxel.redact.excerpts import build_excerpts
+from open_paxel.scorer.openai_scorer import OpenAIScorer
+from open_paxel.text.tokens import divide_into_chunks
 
 
 def test_divide_into_chunks_long_text():
@@ -17,7 +17,7 @@ def test_divide_into_chunks_long_text():
 @pytest.mark.asyncio
 async def test_score_session_dry_run_skips_api():
     scorer = OpenAIScorer(api_key="x", model="gpt-4.1-mini", dry_run=True)
-    from brain_dump.models.domain import HeuristicMetrics, RedactedExcerpt, SessionFacts
+    from open_paxel.models.domain import HeuristicMetrics, RedactedExcerpt, SessionFacts
 
     facts = SessionFacts(session_id="s1", transcript_path="t.jsonl")
     metrics = HeuristicMetrics()
@@ -40,7 +40,7 @@ def test_excerpts_always_include_full_transcript(tmp_path):
 def scorer_prompt(excerpts, facts, metrics) -> dict:
     import json
 
-    from brain_dump.scorer.openai_scorer import OpenAIScorer
+    from open_paxel.scorer.openai_scorer import OpenAIScorer
 
     raw = OpenAIScorer(api_key="x", model="gpt-4.1-mini", dry_run=True).build_user_prompt(
         facts, metrics, excerpts

@@ -2,8 +2,8 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from brain_dump.api.app import STATIC_DIR, create_app
-from brain_dump.config import Settings
+from open_paxel.api.app import STATIC_DIR, create_app
+from open_paxel.config import Settings
 
 
 def test_api_uploads_json():

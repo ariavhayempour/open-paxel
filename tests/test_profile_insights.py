@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from brain_dump.metrics.heuristics import compute_heuristics
-from brain_dump.models.domain import DimensionScore, HeuristicMetrics, SessionFacts, SessionReport, UserMessage
-from brain_dump.profile.insights import build_insight_cards, collect_profile_signals
+from open_paxel.metrics.heuristics import compute_heuristics
+from open_paxel.models.domain import DimensionScore, HeuristicMetrics, SessionFacts, SessionReport, UserMessage
+from open_paxel.profile.insights import build_insight_cards, collect_profile_signals
 
 
 def _report(**kwargs) -> SessionReport:

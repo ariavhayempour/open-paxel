@@ -3,5 +3,5 @@
   "version": "0.1.0",
   "description": "Analyze Claude Code sessions and show your builder profile",
   "hooks": "./hooks/hooks.json",
-  "author": { "name": "Brain Dump" }
+  "author": { "name": "Open-Paxel" }
 }

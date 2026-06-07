@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from brain_dump.metrics.heuristics import compute_heuristics
-from brain_dump.parser.claude_jsonl import ClaudeCodeJsonlParser, decode_project_path
+from open_paxel.metrics.heuristics import compute_heuristics
+from open_paxel.parser.claude_jsonl import ClaudeCodeJsonlParser, decode_project_path
 
 
 FIXTURE = Path(__file__).parent / "fixtures" / "sample.jsonl"
@@ -11,6 +11,9 @@ FIXTURE = Path(__file__).parent / "fixtures" / "sample.jsonl"
 
 def test_decode_project_path():
     assert "Z:" in decode_project_path("Z--June-26-brain-dump")
+    assert decode_project_path("c--Users-91745-OneDrive-Desktop-staru09-github-io") == (
+        r"C:\Users\91745\OneDrive\Desktop\staru09\github\io"
+    )
 
 
 def test_parse_sample_jsonl():

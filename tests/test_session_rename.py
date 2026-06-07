@@ -4,10 +4,10 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
 
-from brain_dump.api.app import create_app
-from brain_dump.config import Settings
-from brain_dump.models.domain import DimensionScore, SessionScore
-from brain_dump.pipeline import AnalysisPipeline
+from open_paxel.api.app import create_app
+from open_paxel.config import Settings
+from open_paxel.models.domain import DimensionScore, SessionScore
+from open_paxel.pipeline import AnalysisPipeline
 
 
 class MockScorer:

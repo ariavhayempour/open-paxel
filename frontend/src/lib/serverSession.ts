@@ -1,6 +1,6 @@
 import { setStoredJobId } from "../components/JobProgressBanner";
 
-const SERVER_INSTANCE_KEY = "brain-dump-server-instance";
+const SERVER_INSTANCE_KEY = "open-paxel-server-instance";
 
 export async function syncServerSession(): Promise<string | null> {
   try {

@@ -1,17 +1,17 @@
 <p align="center">
-  <img src="assets/open.png" alt="Open-Paxel logo" width="180">
+  <img src="./assets/open.png" alt="Open-Paxel logo" width="180" />
 </p>
 
 # Open-Paxel
 
-Local-first, open [Paxel](https://paxel.ycombinator.com/)-style analyzer for **Claude Code** sessions. Builds a historical builder profile across five dimensions — steering, execution, engineering, product instinct, and planning — with narrative sections, decision patterns, insight cards, and a neobrutalism dashboard.
+Local-first, open [Paxel](https://paxel.ycombinator.com/)-style analyzer for **Claude Code** sessions. Builds a historical builder profile across five dimensions (steering, execution, engineering, product instinct, and planning) with narrative sections, decision patterns, insight cards, and a neobrutalism dashboard.
 
 **Privacy:** transcripts stay on your machine. Only redacted excerpts go to **your OpenAI API key**. Scores are stored locally in SQLite (`~/.open-paxel/profile.db`).
 
 ## Prerequisites
 
-- [uv](https://docs.astral.sh/uv/) — Python env and CLI tooling
-- [Node.js](https://nodejs.org/) — only if you run the frontend dev server
+- [uv](https://docs.astral.sh/uv/) for Python env and CLI tooling
+- [Node.js](https://nodejs.org/) only if you run the frontend dev server
 - An [OpenAI API key](https://platform.openai.com/api-keys)
 - Claude Code sessions under `~/.claude/projects/` (for CLI discovery)
 
@@ -30,7 +30,7 @@ uv sync --all-groups          # creates .venv + installs deps
 cp .env.example .env          # then add OPENAI_API_KEY=sk-...
 ```
 
-**Optional — install the CLI globally** so you can run `open-paxel` from any project folder:
+**Optional:** install the CLI globally so you can run `open-paxel` from any project folder:
 
 ```bash
 cd path/to/open-paxel
@@ -86,7 +86,7 @@ Open-Paxel discovers Claude Code sessions for **the current working directory on
 
 ```powershell
 # Example: your Claude project (folder name may differ from Claude's stored path)
-cd C:\Users\you\Desktop\gpu_visuals
+cd project-directory/
 
 open-paxel discover          # shows matched project + session count
 open-paxel upload -y         # analyze all new sessions + run full pipeline
@@ -96,22 +96,22 @@ open-paxel profile --open    # start server and open dashboard
 
 Typical flow:
 
-1. **`discover`** — finds the Claude Code project whose path matches your CWD. Handles aliases like `gpu_visuals` → `gpu\visuals`.
-2. **`upload -y`** — parses each `.jsonl` transcript, scores the session with the LLM, then runs the Paxel batch pipeline (git history, commit linking, decisions, episodes, profile assembly).
-3. **`profile`** or **`serve`** — view the aggregated builder profile.
+1. **`discover`** finds the Claude Code project whose path matches your CWD. Handles aliases like `gpu_visuals` → `gpu\visuals`.
+2. **`upload -y`** parses each `.jsonl` transcript, scores the session with the LLM, then runs the Paxel batch pipeline (git history, commit linking, decisions, episodes, profile assembly).
+3. **`profile`** or **`serve`** shows the aggregated builder profile.
 
 If `discover` finds nothing, `cd` into the directory Claude Code actually used (check `~/.claude/projects/` encoded folder names) or upload files via the dashboard (see below).
 
 ### Dashboard (web UI)
 
-**Production-style** — serves the built frontend from the Python app:
+**Production-style:** serves the built frontend from the Python app:
 
 ```bash
 uv run open-paxel serve
 # → http://127.0.0.1:3847
 ```
 
-**Development** — hot-reload frontend + backend:
+**Development:** hot-reload frontend + backend:
 
 ```bash
 uv run open-paxel dev --open
@@ -126,7 +126,7 @@ Pages:
 | **Sessions** | Per-session scores, titles, and detail view |
 | **Uploads** | Drag-and-drop session files; background job progress |
 
-The UI reads the same SQLite database as the CLI. Run `upload` from the CLI, then refresh the dashboard — or upload directly in the UI.
+The UI reads the same SQLite database as the CLI. Run `upload` from the CLI, then refresh the dashboard, or upload directly in the UI.
 
 ### Upload via dashboard
 
@@ -134,8 +134,8 @@ Supported formats: `.jsonl`, `.md`, `.markdown`, `.txt`
 
 | Format | Git integration | Notes |
 |--------|-----------------|-------|
-| **`.jsonl`** (Claude Code export) | Full — if `cwd` in transcript points to a repo with `.git` | Best option for complete analysis |
-| **`.md` / `.txt`** | Partial — only if you add YAML frontmatter | Transcript analysis always runs; git needs metadata |
+| **`.jsonl`** (Claude Code export) | Full if `cwd` in transcript points to a repo with `.git` | Best option for complete analysis |
+| **`.md` / `.txt`** | Partial only if you add YAML frontmatter | Transcript analysis always runs; git needs metadata |
 
 For markdown/text exports, optional frontmatter enables git log and code-quality labels:
 
@@ -155,7 +155,7 @@ Re-analyze an already-imported session with the **Force re-analyze** checkbox on
 
 ## Commands
 
-With global install, drop the `uv run` prefix. From the repo without global install, use `uv run open-paxel …`.
+With global install, drop the `uv run` prefix. From the repo without global install, use `uv run open-paxel ...`.
 
 | Command | Description |
 |---------|-------------|
@@ -196,7 +196,7 @@ After upload (batch pipeline):
 | `~/.open-paxel/incoming/` | Temp files from UI uploads |
 | `~/.claude/projects/` | Claude Code session `.jsonl` files (read-only) |
 
-If you used the old **Brain Dump** install, data may still live under `~/.brain-dump/` — Open-Paxel picks that up automatically until you migrate.
+If you used the old **Brain Dump** install, data may still live under `~/.brain-dump/`. Open-Paxel picks that up automatically until you migrate.
 
 ## Claude Code plugin
 

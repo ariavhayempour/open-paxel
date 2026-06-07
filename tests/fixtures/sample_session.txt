@@ -1,0 +1,20 @@
+User: How do I add caching to the API?
+
+Assistant: You can use Redis or an in-memory cache. Here's a simple pattern:
+
+```python
+from functools import lru_cache
+
+@lru_cache
+def get_config():
+    return load_config()
+```
+
+User: Actually, use Redis instead — we need persistence across restarts.
+
+Assistant: Good call. Here's a Redis-backed cache:
+
+```bash
+pip install redis
+npm run lint
+```

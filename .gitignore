@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+*.db
+.brain-dump/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+node_modules/
+frontend/dist/
+brain_dump/static/assets/
+brain_dump/static/index.html
+.DS_Store

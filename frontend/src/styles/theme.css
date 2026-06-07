@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+  --color-cream: #f5f0e8;
+  --color-cream-dark: #ebe4d6;
+  --color-ink: #1a1612;
+  --color-cozy-red: #c45c5c;
+  --color-subdued-blue: #5c7fc4;
+  --color-warm-yellow: #d4a853;
+  --color-card: #fffdf8;
+  --shadow-brutal: 4px 4px 0 0 var(--color-ink);
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-cream);
+  color: var(--color-ink);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.card-brutal {
+  border: 2px solid var(--color-ink);
+  box-shadow: var(--shadow-brutal);
+  background: var(--color-card);
+}
+
+.btn-brutal {
+  border: 2px solid var(--color-ink);
+  box-shadow: var(--shadow-brutal);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.btn-brutal:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 0 var(--color-ink);
+}
+
+.btn-brutal:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}

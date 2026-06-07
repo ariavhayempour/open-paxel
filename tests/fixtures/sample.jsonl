@@ -1,0 +1,7 @@
+{"type":"user","uuid":"a1","timestamp":"2026-01-01T10:00:00.000Z","sessionId":"test-session-001","cwd":"Z:\\test\\project","message":{"role":"user","content":"fix the login bug please"},"gitBranch":"main"}
+{"type":"assistant","uuid":"a2","parentUuid":"a1","timestamp":"2026-01-01T10:01:00.000Z","sessionId":"test-session-001","message":{"role":"assistant","model":"claude-sonnet-4","content":[{"type":"tool_use","name":"Read","input":{"file_path":"src/auth.py"}}]}}
+{"type":"user","uuid":"a3","parentUuid":"a2","timestamp":"2026-01-01T10:02:00.000Z","sessionId":"test-session-001","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t1","content":"ok","is_error":false}]}}
+{"type":"assistant","uuid":"a4","parentUuid":"a3","timestamp":"2026-01-01T10:03:00.000Z","sessionId":"test-session-001","message":{"role":"assistant","model":"claude-sonnet-4","content":[{"type":"tool_use","name":"Write","input":{"file_path":"src/auth.py","content":"fixed"}}]}}
+{"type":"user","uuid":"a5","parentUuid":"a4","timestamp":"2026-01-01T10:04:00.000Z","sessionId":"test-session-001","message":{"role":"user","content":"thanks! run pytest too"}}
+{"type":"assistant","uuid":"a6","parentUuid":"a5","timestamp":"2026-01-01T10:05:00.000Z","sessionId":"test-session-001","message":{"role":"assistant","model":"claude-sonnet-4","content":[{"type":"tool_use","name":"Bash","input":{"command":"pytest tests/"}}]}}
+{"type":"ai-title","aiTitle":"Fix login bug","sessionId":"test-session-001"}

@@ -10,7 +10,7 @@ Guidance for AI coding agents working in this repository.
 |---------|------|
 | User-facing product | **Open-Paxel** |
 | CLI command | `open-paxel` |
-| Python package (internal) | `open_paxel` |
+| Python package | `open_paxel` (`pip install open-paxel`) |
 | PyPI / uv project name | `open-paxel` |
 | Data directory (default) | `~/.open-paxel/` (legacy: `~/.brain-dump/`) |
 

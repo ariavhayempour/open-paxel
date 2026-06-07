@@ -17,11 +17,11 @@ class DecisionPattern(BaseModel):
 
 
 def _catalog_paths() -> list[Path]:
-    root = project_root()
     pkg_data = Path(__file__).resolve().parent.parent / "data" / "decision_catalog.json"
+    root = project_root()
     return [
-        root / "assets" / "decision_catalog.json",
         pkg_data,
+        root / "assets" / "decision_catalog.json",
         root / "decision_catalog.json",
     ]
 

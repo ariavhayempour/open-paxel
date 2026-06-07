@@ -5,9 +5,23 @@ build-backend = "hatchling.build"
 [project]
 name = "open-paxel"
 version = "0.1.0"
-description = "Open-Paxel — local-first Claude Code session analyzer and builder profile"
+description = "Open-Paxel - local-first Claude Code session analyzer and builder profile"
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.11"
+authors = [{ name = "staru09" }]
+keywords = ["claude", "claude-code", "paxel", "ai", "developer-profile", "llm"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Quality Assurance",
+]
 dependencies = [
   "typer>=0.12",
   "rich>=13.0",
@@ -23,26 +37,44 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.24",
+  "ruff>=0.8",
+  "build>=1.0",
+]
 anthropic = ["anthropic>=0.40"]
+
+[project.urls]
+Homepage = "https://github.com/staru09/open-paxel"
+Repository = "https://github.com/staru09/open-paxel"
+Documentation = "https://github.com/staru09/open-paxel#readme"
+Issues = "https://github.com/staru09/open-paxel/issues"
+
+[project.scripts]
+open-paxel = "open_paxel.cli:app"
 
 [dependency-groups]
 dev = [
   "pytest>=8.0",
   "pytest-asyncio>=0.24",
   "ruff>=0.8",
+  "build>=1.0",
 ]
 
 [tool.uv]
 default-groups = ["dev"]
 
-[project.scripts]
-open-paxel = "open_paxel.cli:app"
-
 [tool.hatch.build.targets.wheel]
 packages = ["open_paxel"]
+# Include built dashboard assets even though they are gitignored locally
+ignore-vcs = true
 
 [tool.hatch.build.targets.wheel.force-include]
 "assets/decision_catalog.json" = "open_paxel/data/decision_catalog.json"
+
+[tool.hatch.build.targets.sdist]
+ignore-vcs = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

@@ -3,6 +3,7 @@ export interface InsightCard {
   title: string;
   value: string;
   subtitle?: string | null;
+  question?: string | null;
 }
 
 export interface BuilderProfile {

@@ -1,6 +1,6 @@
 import type { InsightCard as InsightCardType } from "../lib/api";
 
-const QUOTED_CARD_IDS = new Set(["goto", "cryptic", "crash"]);
+const WIDE_CARD_IDS = new Set(["relationship", "crash", "shipped"]);
 
 function wrapWords(text: string, wordsPerLine = 11): string {
   const words = text.trim().split(/\s+/).filter(Boolean);
@@ -29,13 +29,20 @@ function QuotedText({ text }: { text: string }) {
 }
 
 function CardValue({ card }: { card: InsightCardType }) {
-  if (card.id === "relationship") {
-    return <>{wrapWords(card.value, 11)}</>;
+  if (card.id === "relationship" || card.id === "shipped") {
+    return <>{card.value}</>;
   }
-  if (QUOTED_CARD_IDS.has(card.id)) {
+  if (card.id === "crash" || card.id === "cryptic" || card.id === "goto") {
     return <QuotedText text={card.value} />;
   }
+  if (card.subtitle && card.subtitle.length > 120) {
+    return <>{wrapWords(card.value, 8)}</>;
+  }
   return <>{card.value}</>;
+}
+
+export function isWideInsightCard(card: InsightCardType): boolean {
+  return WIDE_CARD_IDS.has(card.id) || (card.subtitle?.length ?? 0) > 140;
 }
 
 export function InsightCard({
@@ -45,21 +52,31 @@ export function InsightCard({
   card: InsightCardType;
   wide?: boolean;
 }) {
+  const longSubtitle = (card.subtitle?.length ?? 0) > 100;
+
   return (
     <article
-      className={`card-brutal p-5 ${
-        wide ? "w-full max-w-2xl" : "min-w-[240px] max-w-[280px] flex-shrink-0"
+      className={`card-brutal flex h-full flex-col p-5 ${
+        wide ? "col-span-full max-w-none" : "min-h-[180px]"
       }`}
     >
-      <p className="text-xs font-semibold uppercase tracking-wide text-subdued-blue">{card.title}</p>
+      <p className="text-sm font-semibold text-cozy-red">{card.question || card.title}</p>
       <p
-        className={`font-display mt-2 font-bold leading-snug ${
-          wide ? "whitespace-pre-line text-base" : "text-xl leading-tight"
+        className={`font-display mt-3 font-bold leading-snug ${
+          wide || longSubtitle ? "whitespace-pre-line text-lg" : "text-xl"
         }`}
       >
         <CardValue card={card} />
       </p>
-      {card.subtitle && <p className="mt-2 text-sm opacity-70">{card.subtitle}</p>}
+      {card.subtitle && (
+        <p
+          className={`mt-auto pt-3 text-sm leading-relaxed opacity-75 ${
+            wide ? "whitespace-pre-line" : ""
+          }`}
+        >
+          {wide && card.id === "relationship" ? wrapWords(card.subtitle, 11) : card.subtitle}
+        </p>
+      )}
     </article>
   );
 }

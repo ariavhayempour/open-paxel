@@ -64,6 +64,12 @@ class HeuristicMetrics(BaseModel):
     hour_histogram: dict[int, int] = Field(default_factory=dict)
     peak_hour: int | None = None
     productivity_label: str | None = None
+    thank_you_count: int = 0
+    agent_runs: int = 0
+    max_agent_duration_ms: int = 0
+    lines_added: int = 0
+    redirect_hits: int = 0
+    raw_turn_count: int = 0
 
 
 class RedactedExcerpt(BaseModel):
@@ -113,6 +119,7 @@ class InsightCard(BaseModel):
     title: str
     value: str
     subtitle: str | None = None
+    question: str | None = None
 
 
 class UploadReport(BaseModel):

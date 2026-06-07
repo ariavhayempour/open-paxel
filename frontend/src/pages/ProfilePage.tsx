@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { DimensionRadar } from "../components/DimensionRadar";
-import { InsightCard } from "../components/InsightCard";
+import { InsightCard, isWideInsightCard } from "../components/InsightCard";
 import { fetchProfile } from "../lib/api";
 
 export function ProfilePage() {
@@ -11,34 +11,34 @@ export function ProfilePage() {
   if (error) return <EmptyState />;
   if (!data) return null;
 
-  const scrollCards = data.insight_cards.filter(
-    (c) => c.id !== "relationship" && c.id !== "prompts",
-  );
-  const relationshipCard = data.insight_cards.find((c) => c.id === "relationship");
+  const archetypeCard = data.insight_cards.find((c) => c.id === "archetype");
+  const gridCards = data.insight_cards.filter((c) => c.id !== "archetype");
 
   return (
     <div className="space-y-8">
       <section className="card-brutal bg-cozy-red/10 p-8">
-        <p className="text-sm font-semibold uppercase text-cozy-red">Your archetype</p>
-        <h2 className="font-display mt-2 text-4xl font-bold">{data.archetype}</h2>
-        <p className="mt-2 opacity-70">
+        <p className="text-sm font-semibold text-cozy-red">
+          {archetypeCard?.question || "Your archetype"}
+        </p>
+        <h2 className="font-display mt-2 text-4xl font-bold">
+          {archetypeCard?.value || data.archetype}
+        </h2>
+        {archetypeCard?.subtitle && <p className="mt-3 max-w-2xl opacity-80">{archetypeCard.subtitle}</p>}
+        <p className="mt-3 text-sm opacity-60">
           {data.session_count} sessions · {data.upload_count} uploads
         </p>
       </section>
 
-      <section>
-        <h2 className="font-display mb-4 text-xl font-bold">Insight cards</h2>
-        <div className="flex flex-wrap gap-4 pb-2">
-          {scrollCards.map((card) => (
-            <InsightCard key={card.id} card={card} />
-          ))}
-        </div>
-        {relationshipCard && (
-          <div className="mt-4">
-            <InsightCard card={relationshipCard} wide />
+      {gridCards.length > 0 && (
+        <section>
+          <h2 className="font-display mb-4 text-xl font-bold">Your builder map</h2>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {gridCards.map((card) => (
+              <InsightCard key={card.id} card={card} wide={isWideInsightCard(card)} />
+            ))}
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <DimensionRadar dimensions={data.dimensions} />

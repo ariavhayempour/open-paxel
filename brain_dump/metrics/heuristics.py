@@ -130,6 +130,12 @@ def compute_heuristics(facts: SessionFacts) -> HeuristicMetrics:
         hour_histogram=hour_hist,
         peak_hour=peak_hour,
         productivity_label=_productivity_label(hour_hist),
+        thank_you_count=facts.thank_you_count,
+        agent_runs=facts.agent_runs,
+        max_agent_duration_ms=facts.max_agent_duration_ms,
+        lines_added=facts.lines_added,
+        redirect_hits=facts.redirect_hits,
+        raw_turn_count=facts.raw_turn_count or len(facts.user_messages),
     )
 
 

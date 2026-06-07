@@ -137,6 +137,10 @@ class SQLiteRepository:
         reports = self.list_reports(limit=10_000)
         uploads = self.list_uploads()
         profile = build_profile(reports, uploads)
+        self.save_profile_cache(profile)
+        return profile
+
+    def save_profile_cache(self, profile: BuilderProfile) -> None:
         with self.Session() as session:
             session.merge(
                 ProfileRow(
@@ -146,7 +150,6 @@ class SQLiteRepository:
                 )
             )
             session.commit()
-        return profile
 
     def all_reports_for_profile(self) -> list[SessionReport]:
         return self.list_reports(limit=10_000)

@@ -14,15 +14,9 @@ from brain_dump.models.domain import (
     SessionFacts,
     SessionScore,
 )
-from brain_dump.redact.transcript import redact_text
-from brain_dump.scorer.chunk_summarizer import (
-    CHUNK_SUMMARY_SYSTEM,
-    chunk_summary_user_prompt,
-    dry_run_chunk_summary,
-)
 from brain_dump.scorer.openai_tracker import tracked_openai_call
-from brain_dump.text.chunking import ANALYSIS_CHUNK_TOKENS
-from brain_dump.text.tokens import divide_into_chunks, estimate_tokens
+from brain_dump.text.chunking import MAX_SESSION_TRANSCRIPT_CHARS
+from brain_dump.text.tokens import estimate_tokens
 
 
 class _LLMDimension(BaseModel):
@@ -47,8 +41,8 @@ class _LLMResponse(BaseModel):
 
 SYSTEM_PROMPT = """You score how a developer works with an AI coding assistant in a session.
 
-You receive heuristic scores plus either a lossless accumulated session summary (preferred)
-or short raw excerpts for small sessions.
+You receive the full redacted session transcript plus heuristic scores and session stats.
+Read the transcript and decide what matters for scoring — do not rely on pre-summarized input.
 
 Return honest scores 0-100 for five dimensions:
 - steering: how much the user directs vs lets the agent run
@@ -61,8 +55,7 @@ Also assign an archetype (Architect, Quality Guardian, Velocity Machine, Night O
 2-3 signature_moves (decision patterns), growth_edge (actionable tips),
 and optional insight_candidates: cryptic_prompt, crash_out, agent_relationship.
 
-Base your judgment on the accumulated summary when provided — it already condenses the full session.
-Do not invent code details not present in the input."""
+Focus on evidence from the transcript. Do not invent code details not present in the input."""
 
 
 class OpenAIScorer:
@@ -77,71 +70,13 @@ class OpenAIScorer:
         metrics: HeuristicMetrics,
         excerpts: RedactedExcerpt,
     ) -> SessionScore:
-        if excerpts.raw_transcript and not excerpts.accumulated_summary:
-            emit_progress(
-                f"OpenAI pass 1: summarizing {facts.total_tokens} est. tokens in chunks"
-            )
-            excerpts.accumulated_summary, excerpts.chunk_count = await self.accumulate_chunk_summaries(
-                excerpts.raw_transcript
-            )
-            emit_progress(
-                f"OpenAI pass 1 complete: {excerpts.chunk_count} chunk(s) summarized"
-            )
-
         if self.dry_run:
             return self._fallback_score(metrics)
 
-        emit_progress(f"OpenAI pass 2: scoring session with {self.model}")
-        return await self._score_summary(facts, metrics, excerpts)
-
-    async def accumulate_chunk_summaries(self, text: str) -> tuple[str, int]:
-        text = redact_text(text, max_len=500_000)
-        chunks = divide_into_chunks(text, chunk_tokens=ANALYSIS_CHUNK_TOKENS)
-        if not chunks:
-            return "", 0
-
-        accumulated = ""
-        total = len(chunks)
-
-        for index, chunk in enumerate(chunks, start=1):
-            chunk_input = chunk
-            est = estimate_tokens(chunk_input)
-            if self.dry_run:
-                accumulated = dry_run_chunk_summary(chunk_input, index, total, accumulated)
-                continue
-
-            assert self._client is not None
-
-            async def _call(chunk_text: str = chunk_input, idx: int = index) -> object:
-                return await self._client.chat.completions.create(
-                    model=self.model,
-                    messages=[
-                        {"role": "system", "content": CHUNK_SUMMARY_SYSTEM},
-                        {
-                            "role": "user",
-                            "content": chunk_summary_user_prompt(
-                                chunk=chunk_text,
-                                prior_accumulated=accumulated,
-                                index=idx,
-                                total=total,
-                            ),
-                        },
-                    ],
-                    temperature=0.2,
-                )
-
-            completion = await tracked_openai_call(
-                phase="chunk_summary",
-                model=self.model,
-                call=_call,
-                chunk_index=index,
-                chunk_total=total,
-                detail=f"~{est} input tokens",
-            )
-            part = (completion.choices[0].message.content or "").strip()
-            accumulated = part or accumulated
-
-        return accumulated.strip(), total
+        transcript = excerpts.raw_transcript.strip()
+        est = estimate_tokens(transcript) if transcript else facts.total_tokens
+        emit_progress(f"OpenAI: scoring full session (~{est} est. tokens) with {self.model}")
+        return await self._score_session(facts, metrics, excerpts)
 
     def build_user_prompt(
         self, facts: SessionFacts, metrics: HeuristicMetrics, excerpts: RedactedExcerpt
@@ -153,7 +88,8 @@ class OpenAIScorer:
             "source_format": facts.source_format,
             "is_structured": facts.is_structured,
             "total_tokens": facts.total_tokens,
-            "chunk_count": excerpts.chunk_count,
+            "transcript_tokens": excerpts.metrics_json.get("transcript_tokens"),
+            "transcript_truncated": excerpts.metrics_json.get("transcript_truncated", False),
             "duration_minutes": round(facts.duration_ms / 60000, 1),
             "heuristic_scores": {
                 "steering": metrics.steering,
@@ -172,8 +108,8 @@ class OpenAIScorer:
             },
         }
 
-        if excerpts.accumulated_summary:
-            payload["accumulated_session_summary"] = excerpts.accumulated_summary
+        if excerpts.raw_transcript.strip():
+            payload["session_transcript"] = excerpts.raw_transcript
         else:
             payload["excerpts"] = {
                 "first_prompt": excerpts.first_prompt,
@@ -184,15 +120,13 @@ class OpenAIScorer:
 
         return json.dumps(payload, indent=2)
 
-    async def _score_summary(
+    async def _score_session(
         self,
         facts: SessionFacts,
         metrics: HeuristicMetrics,
         excerpts: RedactedExcerpt,
     ) -> SessionScore:
         user_prompt = self.build_user_prompt(facts, metrics, excerpts)
-        if self.dry_run:
-            return self._fallback_score(metrics)
         assert self._client is not None
 
         prompt_est = estimate_tokens(user_prompt)

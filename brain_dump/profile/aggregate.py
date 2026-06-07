@@ -11,6 +11,7 @@ from brain_dump.models.domain import (
     UploadReport,
 )
 from brain_dump.profile.insights import build_insight_cards, collect_profile_signals
+from brain_dump.profile.narrative_heuristic import build_profile_narrative
 
 
 def build_profile(reports: list[SessionReport], uploads: list[UploadReport]) -> BuilderProfile:
@@ -45,6 +46,16 @@ def build_profile(reports: list[SessionReport], uploads: list[UploadReport]) -> 
 
     move_counts = Counter(all_moves)
     growth_counts = Counter(all_growth)
+    signature_moves = [m for m, _ in move_counts.most_common(5)]
+    growth_edge_list = [g for g, _ in growth_counts.most_common(3)]
+
+    narrative = build_profile_narrative(
+        reports,
+        signals,
+        archetype=top_archetype,
+        signature_moves=signature_moves,
+        growth_edge=growth_edge_list,
+    )
 
     return BuilderProfile(
         updated_at=datetime.utcnow(),
@@ -53,7 +64,8 @@ def build_profile(reports: list[SessionReport], uploads: list[UploadReport]) -> 
         dimensions=dimensions,
         archetype=top_archetype,
         archetype_counts=dict(signals.archetypes),
-        signature_moves=[m for m, _ in move_counts.most_common(5)],
-        growth_edge=[g for g, _ in growth_counts.most_common(3)],
+        signature_moves=signature_moves,
+        growth_edge=growth_edge_list,
         insight_cards=build_insight_cards(signals),
+        narrative=narrative,
     )

@@ -6,6 +6,16 @@ export interface InsightCard {
   question?: string | null;
 }
 
+export interface ProfileNarrative {
+  narrative: string;
+  what_you_built: string;
+  decision_patterns: string;
+  matched_pattern?: string | null;
+  matched_pattern_category?: string | null;
+  strengths: string[];
+  growth_areas: string[];
+}
+
 export interface BuilderProfile {
   updated_at: string;
   session_count: number;
@@ -16,6 +26,7 @@ export interface BuilderProfile {
   signature_moves: string[];
   growth_edge: string[];
   insight_cards: InsightCard[];
+  narrative?: ProfileNarrative | null;
 }
 
 export interface SessionSummary {

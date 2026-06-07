@@ -5,6 +5,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from brain_dump.models.profile_narrative import ProfileNarrative
+
 
 DIMENSIONS = ("steering", "execution", "engineering", "product_instinct", "planning")
 
@@ -166,3 +168,4 @@ class BuilderProfile(BaseModel):
     signature_moves: list[str] = Field(default_factory=list)
     growth_edge: list[str] = Field(default_factory=list)
     insight_cards: list[InsightCard] = Field(default_factory=list)
+    narrative: ProfileNarrative | None = None

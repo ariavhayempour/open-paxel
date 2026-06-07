@@ -126,6 +126,16 @@ async def run_upload_job(
             upload_id=upload_id,
         )
         log(f"Job finished: {succeeded} succeeded, {failed} failed")
+
+        if succeeded and not settings.dry_run:
+            from brain_dump.profile.enrich import enrich_profile_narrative
+
+            repo.update_job(job_id, current_step="Writing profile narrative")
+            log("Generating profile narrative")
+            if await enrich_profile_narrative(settings, repo):
+                log("Profile narrative updated (LLM)")
+            else:
+                log("Profile narrative updated (heuristic)")
     except Exception as exc:
         logger.exception("job=%s crashed", job_id[:8])
         repo.append_job_log(job_id, f"Job crashed: {exc}")

@@ -1,0 +1,91 @@
+from __future__ import annotations
+
+import json
+import logging
+
+from openai import AsyncOpenAI
+from pydantic import BaseModel, Field
+
+from brain_dump.config import Settings
+from brain_dump.models.domain import SessionReport
+from brain_dump.models.profile_narrative import ProfileNarrative
+
+logger = logging.getLogger(__name__)
+
+
+class _LLMProfileNarrative(BaseModel):
+    narrative: str = Field(description="2-3 sentence overview of how the developer uses Claude Code")
+    what_you_built: str = Field(description="Paragraph on projects, outputs, and shipped work")
+    decision_patterns: str = Field(
+        description="Paragraph on decision style, architecture focus, corrections, and steering"
+    )
+    matched_pattern: str | None = Field(
+        default=None, description="Short name for the dominant decision pattern, if clear"
+    )
+    matched_pattern_category: str | None = Field(
+        default=None, description="Category for matched pattern, e.g. Code & Architecture"
+    )
+    strengths: list[str] = Field(default_factory=list, max_length=4)
+    growth_areas: list[str] = Field(default_factory=list, max_length=3)
+
+
+SYSTEM_PROMPT = """You write a builder profile narrative from analyzed Claude Code sessions.
+
+Match this structure and tone (Paxel-style):
+- narrative: overall how they use Claude Code (implementation engine vs planner, control vs delegation)
+- what_you_built: concrete projects, features, deployments, domain work
+- decision_patterns: architecture-heavy vs exploratory, technical catches, scope control; name a matched pattern if evident
+- strengths: 2-4 specific bullets citing session evidence
+- growth_areas: 2-3 actionable bullets with concrete next steps
+
+Be specific to the session data. Do not invent repos, files, or metrics not supported by the input."""
+
+
+def _session_payload(reports: list[SessionReport]) -> str:
+    items = []
+    for r in reports[:20]:
+        dims = {k: v.score for k, v in r.dimensions.items()}
+        items.append(
+            {
+                "title": r.title,
+                "project": r.project_path,
+                "archetype": r.archetype,
+                "dimensions": dims,
+                "signature_moves": r.signature_moves,
+                "growth_edge": r.growth_edge,
+                "insights": r.insight_candidates,
+            }
+        )
+    return json.dumps(items, indent=2)
+
+
+async def generate_profile_narrative_llm(
+    reports: list[SessionReport],
+    settings: Settings,
+) -> ProfileNarrative | None:
+    if not reports or settings.dry_run:
+        return None
+    key = settings.resolve_api_key()
+    if not key:
+        return None
+
+    client = AsyncOpenAI(api_key=key)
+    try:
+        completion = await client.beta.chat.completions.parse(
+            model=settings.model,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {
+                    "role": "user",
+                    "content": f"Write the profile narrative for {len(reports)} session(s):\n\n{_session_payload(reports)}",
+                },
+            ],
+            response_format=_LLMProfileNarrative,
+        )
+        parsed = completion.choices[0].message.parsed
+        if not parsed:
+            return None
+        return ProfileNarrative.model_validate(parsed.model_dump())
+    except Exception:
+        logger.exception("Profile narrative LLM generation failed")
+        return None

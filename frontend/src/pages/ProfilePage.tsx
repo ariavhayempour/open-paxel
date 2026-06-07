@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { DimensionRadar } from "../components/DimensionRadar";
 import { InsightCard, isWideInsightCard } from "../components/InsightCard";
+import { ProfileNarrativeReport } from "../components/ProfileNarrativeReport";
 import { fetchProfile } from "../lib/api";
 
 export function ProfilePage() {
@@ -23,11 +24,12 @@ export function ProfilePage() {
         <h2 className="font-display mt-2 text-4xl font-bold">
           {archetypeCard?.value || data.archetype}
         </h2>
-        {archetypeCard?.subtitle && <p className="mt-3 max-w-2xl opacity-80">{archetypeCard.subtitle}</p>}
         <p className="mt-3 text-sm opacity-60">
           {data.session_count} sessions · {data.upload_count} uploads
         </p>
       </section>
+
+      {data.narrative && <ProfileNarrativeReport narrative={data.narrative} />}
 
       {gridCards.length > 0 && (
         <section>
@@ -40,32 +42,10 @@ export function ProfilePage() {
         </section>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <section>
+        <h2 className="font-display mb-4 text-xl font-bold">Dimensions</h2>
         <DimensionRadar dimensions={data.dimensions} />
-
-        <section className="space-y-4">
-          <div className="card-brutal p-5">
-            <h2 className="font-display text-lg font-bold">Signature moves</h2>
-            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
-              {data.signature_moves.length ? (
-                data.signature_moves.map((m) => <li key={m}>{m}</li>)
-              ) : (
-                <li className="list-none pl-0 opacity-60">Analyze more sessions to discover patterns</li>
-              )}
-            </ul>
-          </div>
-          <div className="card-brutal border-subdued-blue bg-subdued-blue/5 p-5">
-            <h2 className="font-display text-lg font-bold">Growth edge</h2>
-            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
-              {data.growth_edge.length ? (
-                data.growth_edge.map((g) => <li key={g}>{g}</li>)
-              ) : (
-                <li className="list-none pl-0 opacity-60">Run upload to get personalized tips</li>
-              )}
-            </ul>
-          </div>
-        </section>
-      </div>
+      </section>
     </div>
   );
 }

@@ -1,8 +1,4 @@
-from brain_dump.text.chunking import (
-    ANALYSIS_CHUNK_TOKENS,
-    CHUNK_SUMMARIZE_THRESHOLD,
-    needs_chunk_summarization,
-)
+from brain_dump.text.chunking import MAX_SESSION_TRANSCRIPT_CHARS
 from brain_dump.text.document_scan import scan_document
 from brain_dump.text.tokens import (
     chunk_paragraphs,
@@ -12,12 +8,10 @@ from brain_dump.text.tokens import (
 )
 
 __all__ = [
-    "ANALYSIS_CHUNK_TOKENS",
-    "CHUNK_SUMMARIZE_THRESHOLD",
+    "MAX_SESSION_TRANSCRIPT_CHARS",
     "scan_document",
     "estimate_tokens",
     "sliding_windows",
     "divide_into_chunks",
     "chunk_paragraphs",
-    "needs_chunk_summarization",
 ]

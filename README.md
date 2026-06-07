@@ -8,6 +8,16 @@ Local-first, open [Paxel](https://paxel.ycombinator.com/)-style analyzer for **C
 
 **Privacy:** transcripts stay on your machine. Only redacted excerpts go to **your OpenAI API key**. Scores are stored locally in SQLite (`~/.open-paxel/profile.db`).
 
+## Preview
+
+<p align="center">
+  <img src="./assets/main.png" alt="Open-Paxel profile: archetype, narrative, and what you built" width="720" />
+</p>
+
+<p align="center">
+  <img src="./assets/hero.png" alt="Open-Paxel builder map and dimension scores" width="720" />
+</p>
+
 ## Prerequisites
 
 - [uv](https://docs.astral.sh/uv/) for Python env and CLI tooling

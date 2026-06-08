@@ -5,11 +5,14 @@ from open_paxel.scorer.openai_scorer import OpenAIScorer
 
 
 def get_scorer(settings: Settings):
-    if settings.llm_provider == "openai":
+    provider = settings.llm_provider.lower()
+    if provider == "openai":
         key = settings.resolve_api_key()
         if not key and not settings.dry_run:
             raise ValueError(
                 "OpenAI API key required. Set OPENAI_API_KEY or openai_api_key in config.toml"
             )
-        return OpenAIScorer(api_key=key or "dry-run", model=settings.model, dry_run=settings.dry_run)
-    raise ValueError(f"Unsupported llm_provider: {settings.llm_provider}")
+        return OpenAIScorer(settings)
+    if provider == "ollama":
+        return OpenAIScorer(settings)
+    raise ValueError(f"Unsupported llm_provider: {settings.llm_provider}. Use 'openai' or 'ollama'.")

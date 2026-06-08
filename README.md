@@ -114,6 +114,36 @@ concurrency = 3
 
 Legacy `BRAIN_DUMP_*` env vars and `~/.brain-dump/` data paths are still supported if you already have an existing install.
 
+### Use Ollama (local LLM, no OpenAI key)
+
+1. Install and start [Ollama](https://ollama.com/)
+2. Pull a model:
+
+```bash
+ollama pull llama3.2
+```
+
+3. Configure Open-Paxel:
+
+```env
+# .env
+OPEN_PAXEL_LLM_PROVIDER=ollama
+OPEN_PAXEL_MODEL=llama3.2
+OPEN_PAXEL_OLLAMA_BASE_URL=http://localhost:11434/v1
+```
+
+Or in `~/.open-paxel/config.toml`:
+
+```toml
+llm_provider = "ollama"
+model = "llama3.2"
+ollama_base_url = "http://localhost:11434/v1"
+```
+
+No API key is required. Open-Paxel uses Ollama's OpenAI-compatible API for session narratives, decision classification, episode scoring, and profile generation.
+
+For best results, use a model that follows JSON instructions well (e.g. `llama3.2`, `qwen2.5`, `mistral`).
+
 ## How to use
 
 ### Recommended: CLI from your project folder

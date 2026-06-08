@@ -4,10 +4,11 @@ import json
 import logging
 import uuid
 
-from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 
 from open_paxel.config import Settings
+from open_paxel.llm.client import create_async_llm_client
+from open_paxel.llm.structured import parse_structured_completion
 from open_paxel.models.domain import DIMENSIONS, SessionReport
 from open_paxel.models.pipeline_models import Episode, WorkStream
 from open_paxel.models.scores import DimensionScore
@@ -116,38 +117,40 @@ async def score_episode(
             skip_reason="no evidence",
         )
 
-    if settings.dry_run:
+    if settings.dry_run or not settings.llm_configured():
         return _heuristic_episode(stream, stream_reports)
 
-    key = settings.resolve_api_key()
-    if not key:
+    client = create_async_llm_client(settings)
+    if client is None:
         return _heuristic_episode(stream, stream_reports)
 
+    model = settings.effective_model()
     payload = _episode_payload(
         stream,
         stream_reports,
         code_quality_label=code_quality_label,
         decision_summaries=decision_summaries,
     )
-    client = AsyncOpenAI(api_key=key)
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": json.dumps(payload, indent=2)},
+    ]
     try:
-        async def _call() -> object:
-            return await client.beta.chat.completions.parse(
-                model=settings.model,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": json.dumps(payload, indent=2)},
-                ],
-                response_format=_EpisodeScoreLLM,
+        async def _call() -> _EpisodeScoreLLM | None:
+            return await parse_structured_completion(
+                client,
+                settings=settings,
+                model=model,
+                messages=messages,
+                response_model=_EpisodeScoreLLM,
             )
 
-        completion = await tracked_openai_call(
+        parsed = await tracked_openai_call(
             phase="episode_scoring",
-            model=settings.model,
+            model=model,
             call=_call,
             detail=f"{len(stream_reports)} sessions",
         )
-        parsed = completion.choices[0].message.parsed
         if not parsed:
             return _heuristic_episode(stream, stream_reports)
 

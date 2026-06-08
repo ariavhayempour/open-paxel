@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import json
 
-from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 
 from open_paxel.analysis.context import emit_progress
+from open_paxel.config import Settings
+from open_paxel.llm.client import create_async_llm_client, llm_provider_label
+from open_paxel.llm.structured import parse_structured_completion
 from open_paxel.models.domain import (
     DIMENSIONS,
     DimensionScore,
@@ -15,7 +17,6 @@ from open_paxel.models.domain import (
     SessionScore,
 )
 from open_paxel.scorer.openai_tracker import tracked_openai_call
-from open_paxel.text.chunking import MAX_SESSION_TRANSCRIPT_CHARS
 from open_paxel.text.tokens import estimate_tokens
 
 
@@ -59,10 +60,11 @@ Focus on evidence from the transcript. Do not invent code details not present in
 
 
 class OpenAIScorer:
-    def __init__(self, api_key: str, model: str, dry_run: bool = False):
-        self.model = model
-        self.dry_run = dry_run
-        self._client = AsyncOpenAI(api_key=api_key) if not dry_run else None
+    def __init__(self, settings: Settings):
+        self.settings = settings
+        self.model = settings.effective_model()
+        self.dry_run = settings.dry_run
+        self._client = create_async_llm_client(settings)
 
     async def score_session(
         self,
@@ -70,12 +72,13 @@ class OpenAIScorer:
         metrics: HeuristicMetrics,
         excerpts: RedactedExcerpt,
     ) -> SessionScore:
-        if self.dry_run:
+        if self.dry_run or self._client is None:
             return self._fallback_score(metrics)
 
         transcript = excerpts.raw_transcript.strip()
         est = estimate_tokens(transcript) if transcript else facts.total_tokens
-        emit_progress(f"OpenAI: scoring full session (~{est} est. tokens) with {self.model}")
+        label = llm_provider_label(self.settings)
+        emit_progress(f"{label}: scoring full session (~{est} est. tokens) with {self.model}")
         return await self._score_session(facts, metrics, excerpts)
 
     def build_user_prompt(
@@ -130,28 +133,30 @@ class OpenAIScorer:
         assert self._client is not None
 
         prompt_est = estimate_tokens(user_prompt)
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_prompt},
+        ]
 
-        async def _call() -> object:
-            return await self._client.beta.chat.completions.parse(
+        async def _call() -> _LLMResponse | None:
+            return await parse_structured_completion(
+                self._client,
+                settings=self.settings,
                 model=self.model,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": user_prompt},
-                ],
-                response_format=_LLMResponse,
+                messages=messages,
+                response_model=_LLMResponse,
             )
 
-        completion = await tracked_openai_call(
+        parsed = await tracked_openai_call(
             phase="session_score",
             model=self.model,
             call=_call,
             detail=f"~{prompt_est} prompt tokens",
         )
-        parsed = completion.choices[0].message.parsed
         if parsed is None:
             return self._fallback_score(metrics)
         score = self._to_session_score(parsed)
-        emit_progress(f"OpenAI scoring done: archetype={score.archetype}")
+        emit_progress(f"{llm_provider_label(self.settings)} scoring done: archetype={score.archetype}")
         return score
 
     def _to_session_score(self, parsed: _LLMResponse) -> SessionScore:
@@ -186,6 +191,6 @@ class OpenAIScorer:
             dimensions=dimensions,
             archetype="Explorer",
             signature_moves=["Iterates with short prompts"],
-            growth_edge=["Enable OpenAI scoring for richer feedback"],
+            growth_edge=["Enable LLM scoring for richer feedback"],
             insight_candidates={},
         )

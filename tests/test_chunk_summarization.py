@@ -1,5 +1,6 @@
 import pytest
 
+from open_paxel.config import Settings
 from open_paxel.metrics.heuristics import compute_heuristics
 from open_paxel.parser.text_session import TextSessionParser
 from open_paxel.redact.excerpts import build_excerpts
@@ -16,7 +17,7 @@ def test_divide_into_chunks_long_text():
 
 @pytest.mark.asyncio
 async def test_score_session_dry_run_skips_api():
-    scorer = OpenAIScorer(api_key="x", model="gpt-4.1-mini", dry_run=True)
+    scorer = OpenAIScorer(Settings(dry_run=True, openai_api_key="x"))
     from open_paxel.models.domain import HeuristicMetrics, RedactedExcerpt, SessionFacts
 
     facts = SessionFacts(session_id="s1", transcript_path="t.jsonl")
@@ -42,7 +43,7 @@ def scorer_prompt(excerpts, facts, metrics) -> dict:
 
     from open_paxel.scorer.openai_scorer import OpenAIScorer
 
-    raw = OpenAIScorer(api_key="x", model="gpt-4.1-mini", dry_run=True).build_user_prompt(
+    raw = OpenAIScorer(Settings(dry_run=True, openai_api_key="x")).build_user_prompt(
         facts, metrics, excerpts
     )
     return json.loads(raw)

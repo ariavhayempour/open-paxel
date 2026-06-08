@@ -3,10 +3,11 @@ from __future__ import annotations
 import json
 import logging
 
-from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 
 from open_paxel.config import Settings
+from open_paxel.llm.client import create_async_llm_client
+from open_paxel.llm.structured import parse_structured_completion
 from open_paxel.models.domain import HeuristicMetrics, RedactedExcerpt, SessionFacts
 from open_paxel.models.pipeline_models import SessionNarrative
 from open_paxel.scorer.openai_tracker import tracked_openai_call
@@ -43,14 +44,22 @@ async def generate_session_narrative(
             shipped=bool(facts.files_edited or facts.lines_added),
         )
 
-    key = settings.resolve_api_key()
-    if not key:
+    if not settings.llm_configured():
         return SessionNarrative(
             summary=facts.title or "Session analyzed with heuristics only.",
             what_was_built=facts.title or "Untitled session",
             shipped=bool(facts.lines_added),
         )
 
+    client = create_async_llm_client(settings)
+    if client is None:
+        return SessionNarrative(
+            summary=facts.title or "Session analyzed with heuristics only.",
+            what_was_built=facts.title or "Untitled session",
+            shipped=bool(facts.lines_added),
+        )
+
+    model = settings.effective_model()
     payload = {
         "title": facts.title,
         "project": facts.project_path,
@@ -62,25 +71,26 @@ async def generate_session_narrative(
         },
         "session_transcript": excerpts.raw_transcript,
     }
-    client = AsyncOpenAI(api_key=key)
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": json.dumps(payload, indent=2)},
+    ]
     try:
-        async def _call() -> object:
-            return await client.beta.chat.completions.parse(
-                model=settings.model,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": json.dumps(payload, indent=2)},
-                ],
-                response_format=_SessionNarrativeLLM,
+        async def _call() -> _SessionNarrativeLLM | None:
+            return await parse_structured_completion(
+                client,
+                settings=settings,
+                model=model,
+                messages=messages,
+                response_model=_SessionNarrativeLLM,
             )
 
-        completion = await tracked_openai_call(
+        parsed = await tracked_openai_call(
             phase="session_narrative",
-            model=settings.model,
+            model=model,
             call=_call,
             detail=f"~{estimate_tokens(excerpts.raw_transcript)} transcript tokens",
         )
-        parsed = completion.choices[0].message.parsed
         if parsed:
             return SessionNarrative.model_validate(parsed.model_dump())
     except Exception:

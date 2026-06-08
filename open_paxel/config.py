@@ -81,6 +81,10 @@ class Settings(BaseSettings):
         default=None,
         validation_alias=AliasChoices("OPENAI_API_KEY", "OPEN_PAXEL_OPENAI_API_KEY", "BRAIN_DUMP_OPENAI_API_KEY"),
     )
+    ollama_base_url: str = Field(
+        default="http://localhost:11434/v1",
+        validation_alias=AliasChoices("OPEN_PAXEL_OLLAMA_BASE_URL", "OLLAMA_HOST"),
+    )
     model: str = "gpt-4.1-mini"
     concurrency: int = 3
     redaction_level: str = "standard"
@@ -100,6 +104,21 @@ class Settings(BaseSettings):
 
     def resolve_api_key(self) -> str | None:
         return self.openai_api_key
+
+    def llm_configured(self) -> bool:
+        """True when an LLM backend is available for scoring/narrative calls."""
+        if self.dry_run:
+            return False
+        if self.llm_provider.lower() == "ollama":
+            return True
+        return bool(self.openai_api_key)
+
+    def effective_model(self) -> str:
+        if self.model:
+            return self.model
+        if self.llm_provider.lower() == "ollama":
+            return "llama3.2"
+        return "gpt-4.1-mini"
 
     @classmethod
     def load(cls) -> Settings:

@@ -3,10 +3,11 @@ from __future__ import annotations
 import json
 import logging
 
-from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 
 from open_paxel.config import Settings
+from open_paxel.llm.client import create_async_llm_client
+from open_paxel.llm.structured import parse_structured_completion
 from open_paxel.models.domain import SessionReport
 from open_paxel.models.profile_narrative import ProfileNarrative
 
@@ -77,26 +78,29 @@ async def generate_profile_narrative_llm(
     decision_stats: dict[str, object] | None = None,
     episodes: list | None = None,
 ) -> ProfileNarrative | None:
-    if not reports or settings.dry_run:
-        return None
-    key = settings.resolve_api_key()
-    if not key:
+    if not reports or settings.dry_run or not settings.llm_configured():
         return None
 
-    client = AsyncOpenAI(api_key=key)
+    client = create_async_llm_client(settings)
+    if client is None:
+        return None
+
+    model = settings.effective_model()
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {
+            "role": "user",
+            "content": f"Write the profile narrative for {len(reports)} session(s):\n\n{_session_payload(reports, decision_stats=decision_stats, episodes=episodes)}",
+        },
+    ]
     try:
-        completion = await client.beta.chat.completions.parse(
-            model=settings.model,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {
-                    "role": "user",
-                    "content": f"Write the profile narrative for {len(reports)} session(s):\n\n{_session_payload(reports, decision_stats=decision_stats, episodes=episodes)}",
-                },
-            ],
-            response_format=_LLMProfileNarrative,
+        parsed = await parse_structured_completion(
+            client,
+            settings=settings,
+            model=model,
+            messages=messages,
+            response_model=_LLMProfileNarrative,
         )
-        parsed = completion.choices[0].message.parsed
         if not parsed:
             return None
         return ProfileNarrative.model_validate(parsed.model_dump())

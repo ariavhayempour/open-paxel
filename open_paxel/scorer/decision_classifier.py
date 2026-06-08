@@ -3,11 +3,12 @@ from __future__ import annotations
 import json
 import logging
 
-from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 
 from open_paxel.config import Settings
 from open_paxel.decisions.catalog import catalog_by_key, compact_catalog_for_prompt
+from open_paxel.llm.client import create_async_llm_client
+from open_paxel.llm.structured import parse_structured_completion
 from open_paxel.models.domain import SessionReport
 from open_paxel.models.pipeline_models import Decision
 from open_paxel.scorer.openai_tracker import tracked_openai_call
@@ -73,37 +74,39 @@ async def classify_decisions(
             )
     if not traces:
         return []
-    if settings.dry_run:
+    if settings.dry_run or not settings.llm_configured():
         return _dry_run_decisions(reports)
 
-    key = settings.resolve_api_key()
-    if not key:
+    client = create_async_llm_client(settings)
+    if client is None:
         return _dry_run_decisions(reports)
 
+    model = settings.effective_model()
     valid_keys = set(catalog_by_key().keys())
     payload = {
         "steering_traces": traces[:40],
         "catalog": compact_catalog_for_prompt(),
     }
-    client = AsyncOpenAI(api_key=key)
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": json.dumps(payload, indent=2)},
+    ]
     try:
-        async def _call() -> object:
-            return await client.beta.chat.completions.parse(
-                model=settings.model,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": json.dumps(payload, indent=2)},
-                ],
-                response_format=_DecisionBatch,
+        async def _call() -> _DecisionBatch | None:
+            return await parse_structured_completion(
+                client,
+                settings=settings,
+                model=model,
+                messages=messages,
+                response_model=_DecisionBatch,
             )
 
-        completion = await tracked_openai_call(
+        parsed = await tracked_openai_call(
             phase="decision_classifier",
-            model=settings.model,
+            model=model,
             call=_call,
             detail=f"{len(traces)} traces",
         )
-        parsed = completion.choices[0].message.parsed
         if not parsed:
             return _dry_run_decisions(reports)
 

@@ -52,7 +52,7 @@ API (api/routes/*) ────────┼──► upload/worker.py
 | DB | `open_paxel/db/` | SQLAlchemy models + `SQLiteRepository` |
 | Frontend | `frontend/src/` | React 19 + Vite; build → `open_paxel/static/` |
 | Config | `open_paxel/config.py` | Settings, `OPEN_PAXEL_*` env vars, legacy `BRAIN_DUMP_*` |
-| LLM clients | `open_paxel/llm/` | OpenAI and Ollama (OpenAI-compatible) structured completions |
+| LLM clients | `open_paxel/llm/` | OpenAI, OpenRouter, and Ollama (OpenAI-compatible) structured completions |
 
 ### Pipeline order (batch)
 

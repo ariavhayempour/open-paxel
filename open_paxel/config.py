@@ -81,6 +81,11 @@ class Settings(BaseSettings):
         default=None,
         validation_alias=AliasChoices("OPENAI_API_KEY", "OPEN_PAXEL_OPENAI_API_KEY", "BRAIN_DUMP_OPENAI_API_KEY"),
     )
+    openrouter_api_key: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("OPENROUTER_API_KEY", "OPEN_PAXEL_OPENROUTER_API_KEY"),
+    )
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
     ollama_base_url: str = Field(
         default="http://localhost:11434/v1",
         validation_alias=AliasChoices("OPEN_PAXEL_OLLAMA_BASE_URL", "OLLAMA_HOST"),
@@ -103,21 +108,32 @@ class Settings(BaseSettings):
         return self.home / "config.toml"
 
     def resolve_api_key(self) -> str | None:
+        provider = self.llm_provider.lower()
+        if provider == "openrouter":
+            return self.openrouter_api_key
+        if provider == "ollama":
+            return None
         return self.openai_api_key
 
     def llm_configured(self) -> bool:
         """True when an LLM backend is available for scoring/narrative calls."""
         if self.dry_run:
             return False
-        if self.llm_provider.lower() == "ollama":
+        provider = self.llm_provider.lower()
+        if provider == "ollama":
             return True
+        if provider == "openrouter":
+            return bool(self.openrouter_api_key)
         return bool(self.openai_api_key)
 
     def effective_model(self) -> str:
         if self.model:
             return self.model
-        if self.llm_provider.lower() == "ollama":
+        provider = self.llm_provider.lower()
+        if provider == "ollama":
             return "llama3.2"
+        if provider == "openrouter":
+            return "openai/gpt-4o-mini"
         return "gpt-4.1-mini"
 
     @classmethod

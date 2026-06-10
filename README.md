@@ -144,6 +144,31 @@ No API key is required. Open-Paxel uses Ollama's OpenAI-compatible API for sessi
 
 For best results, use a model that follows JSON instructions well (e.g. `llama3.2`, `qwen2.5`, `mistral`).
 
+### Use OpenRouter (multi-model API)
+
+[OpenRouter](https://openrouter.ai/) exposes many models through one OpenAI-compatible API.
+
+1. Create an API key at [openrouter.ai/keys](https://openrouter.ai/keys)
+2. Configure Open-Paxel:
+
+```env
+# .env
+OPEN_PAXEL_LLM_PROVIDER=openrouter
+OPENROUTER_API_KEY=sk-or-v1-...
+OPEN_PAXEL_MODEL=openai/gpt-4o-mini
+```
+
+Or in `~/.open-paxel/config.toml`:
+
+```toml
+llm_provider = "openrouter"
+openrouter_api_key = "sk-or-v1-..."
+model = "anthropic/claude-3.5-sonnet"
+openrouter_base_url = "https://openrouter.ai/api/v1"
+```
+
+Model IDs use OpenRouter's `provider/model` format (e.g. `openai/gpt-4o-mini`, `anthropic/claude-3.5-sonnet`, `google/gemini-flash-1.5`). Open-Paxel tries structured outputs first and falls back to JSON prompting when a model does not support them.
+
 ## How to use
 
 ### Recommended: CLI from your project folder

@@ -13,6 +13,7 @@ from open_paxel.models.pipeline_models import (
     SessionNarrative,
     SteeringTrace,
 )
+from open_paxel.models.scores import DimensionScore
 
 
 DIMENSIONS = ("steering", "execution", "engineering", "product_instinct", "planning")
@@ -93,9 +94,6 @@ class RedactedExcerpt(BaseModel):
     accumulated_summary: str = ""
     chunk_count: int = 0
     metrics_json: dict[str, Any] = Field(default_factory=dict)
-
-
-from open_paxel.models.scores import DimensionScore
 
 
 class SessionScore(BaseModel):

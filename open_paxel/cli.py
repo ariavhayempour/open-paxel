@@ -237,6 +237,9 @@ def dev(
 
 @app.command()
 def serve(
+    host: str | None = typer.Option(
+        None, "--host", help="Bind address (default from OPEN_PAXEL_HOST, else 127.0.0.1)"
+    ),
     port: int = typer.Option(3847, "--port"),
     open_browser: bool = typer.Option(False, "--open"),
     log_level: str = typer.Option("INFO", "--log-level", help="DEBUG, INFO, WARNING"),
@@ -252,12 +255,14 @@ def serve(
 
     setup_logging(log_level)
 
+    bind_host = host if host is not None else Settings.load().host
+
     if open_browser:
         webbrowser.open(f"http://127.0.0.1:{port}")
     uvicorn.run(
         "open_paxel.api.app:create_app",
         factory=True,
-        host="127.0.0.1",
+        host=bind_host,
         port=port,
         reload=reload,
         log_level="info",

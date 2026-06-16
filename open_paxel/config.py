@@ -76,6 +76,7 @@ class Settings(BaseSettings):
     )
 
     home: Path = Field(default_factory=default_home)
+    host: str = "127.0.0.1"
     llm_provider: str = "openai"
     openai_api_key: str | None = Field(
         default=None,

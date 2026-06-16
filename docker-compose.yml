@@ -11,6 +11,10 @@ services:
       OPEN_PAXEL_HOST: "0.0.0.0"
       # App data (profile.db, config.toml, incoming/) lives on the named volume.
       OPEN_PAXEL_HOME: "/data"
+      # When OPEN_PAXEL_LLM_PROVIDER=ollama, talk to the bundled service by
+      # default. Override in .env (e.g. http://host.docker.internal:11434/v1)
+      # to use a host-installed Ollama instead. Ignored for non-ollama providers.
+      OPEN_PAXEL_OLLAMA_BASE_URL: "${OPEN_PAXEL_OLLAMA_BASE_URL:-http://ollama:11434/v1}"
     ports:
       - "3847:3847"
     volumes:
@@ -21,5 +25,30 @@ services:
       # Persistent app data — survives `docker compose down`.
       - "openpaxel-data:/data"
 
+  # Bundled local LLM — only starts with `docker compose --profile ollama up`.
+  ollama:
+    image: ollama/ollama
+    profiles: ["ollama"]
+    volumes:
+      - "ollama-data:/root/.ollama"
+
+  # One-shot: pull the model named by OPEN_PAXEL_MODEL (default llama3.2) into
+  # the ollama volume, then exit. Single source of truth — the app reads the
+  # same OPEN_PAXEL_MODEL. Manual fallback: `docker compose exec ollama ollama pull <model>`.
+  ollama-pull:
+    image: ollama/ollama
+    profiles: ["ollama"]
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_HOST: "http://ollama:11434"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        until ollama list >/dev/null 2>&1; do echo 'waiting for ollama...'; sleep 1; done
+        ollama pull "${OPEN_PAXEL_MODEL:-llama3.2}"
+    restart: "no"
+
 volumes:
   openpaxel-data:
+  ollama-data:

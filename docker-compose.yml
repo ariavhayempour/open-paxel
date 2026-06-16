@@ -1,0 +1,25 @@
+services:
+  app:
+    build: .
+    image: open-paxel
+    # Provider + key (OPENAI_API_KEY / OPENROUTER_API_KEY / provider selection)
+    # come from .env — copy .env.example to .env first.
+    env_file: .env
+    environment:
+      # Container-only: bind all interfaces so the published port is reachable.
+      # The code default stays 127.0.0.1 for local (non-Docker) use.
+      OPEN_PAXEL_HOST: "0.0.0.0"
+      # App data (profile.db, config.toml, incoming/) lives on the named volume.
+      OPEN_PAXEL_HOME: "/data"
+    ports:
+      - "3847:3847"
+    volumes:
+      # Host Claude sessions, read-only. Mounted at the container user's
+      # $HOME/.claude (HOME=/home/app) because discovery reads
+      # Path.home()/.claude/projects. (~ is NOT expanded by compose — use ${HOME}.)
+      - "${HOME}/.claude:/home/app/.claude:ro"
+      # Persistent app data — survives `docker compose down`.
+      - "openpaxel-data:/data"
+
+volumes:
+  openpaxel-data:

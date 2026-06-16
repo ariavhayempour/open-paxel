@@ -64,7 +64,6 @@ class HeuristicMetrics(BaseModel):
     engineering: float = 0.0
     product_instinct: float = 0.0
     planning: float = 0.0
-    steering_rate: float = 0.0
     redirect_rate: float = 0.0
     plan_mode_used: bool = False
     avg_prompt_words: float = 0.0

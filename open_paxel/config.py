@@ -198,6 +198,18 @@ openai_api_key = "{api_key}"
 model = "gpt-4.1-mini"
 concurrency = 3
 redaction_level = "standard"
+
+# Max response tokens per LLM call. Reasoning models (e.g. qwen3) spend a large
+# share on hidden reasoning, so leave room for the reasoning trace AND the JSON
+# answer, or content can come back empty.
+max_output_tokens = 8000
+
+# Long transcripts are condensed into a running summary before scoring so they
+# fit local-model context windows. Size chunks to ~half your model context (in
+# characters) and cap chunk count to bound latency on huge sessions.
+condense_over_est_tokens = 40000
+condense_chunk_chars = 120000
+condense_max_chunks = 12
 ''',
         encoding="utf-8",
     )

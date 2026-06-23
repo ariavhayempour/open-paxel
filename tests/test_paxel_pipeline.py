@@ -2,7 +2,7 @@ import pytest
 
 from open_paxel.decisions.catalog import catalog_by_key, load_decision_catalog
 from open_paxel.discover.scanner import discover_repo_for_cwd, filter_repos_by_cwd
-from open_paxel.discover.scanner import RepoInfo
+from open_paxel.discover.scanner import RepoInfo, _claude_encoded_key
 from pathlib import Path
 
 
@@ -141,6 +141,40 @@ def test_discover_repo_corrects_path_for_audiobook_generator():
     corrected = _correct_repo_path(matched[0], cwd.resolve())
     assert corrected.path == str(cwd.resolve())
     assert corrected.name == "audiobook_generator"
+
+
+def test_claude_encoded_key_posix():
+    # POSIX roots encode with a single leading dash (no drive letter).
+    key = _claude_encoded_key(Path("/Users/surya/ai/projects/mcp-postgres-oidc"))
+    assert key == "-users-surya-ai-projects-mcp-postgres-oidc"
+
+
+def test_filter_repos_ignores_posix_user_home_false_positive():
+    # Regression: on macOS/Linux the home project (/Users/<name>) must not
+    # swallow a sub-project CWD. The real project is recovered via the
+    # encoded-key fingerprint even though hyphen-decoding mangles its path
+    # (mcp-postgres-oidc -> mcp/postgres/oidc).
+    repos = [
+        RepoInfo(
+            name="surya",
+            path="/Users/surya",
+            encoded_dir="-Users-surya",
+            session_count=20,
+            session_paths=[],
+        ),
+        RepoInfo(
+            name="oidc",
+            path="/Users/surya/ai/projects/mcp/postgres/oidc",
+            encoded_dir="-Users-surya-ai-projects-mcp-postgres-oidc",
+            session_count=2,
+            session_paths=[],
+        ),
+    ]
+    cwd = Path("/Users/surya/ai/projects/mcp-postgres-oidc")
+    matched = filter_repos_by_cwd(repos, cwd)
+    assert len(matched) == 1
+    assert matched[0].encoded_dir == "-Users-surya-ai-projects-mcp-postgres-oidc"
+    assert matched[0].session_count == 2
 
 
 def test_work_streams_single_project():

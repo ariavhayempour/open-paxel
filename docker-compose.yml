@@ -12,9 +12,12 @@ services:
       # App data (profile.db, config.toml, incoming/) lives on the named volume.
       OPEN_PAXEL_HOME: "/data"
       # When OPEN_PAXEL_LLM_PROVIDER=ollama, talk to the bundled service by
-      # default. Override in .env (e.g. http://host.docker.internal:11434/v1)
-      # to use a host-installed Ollama instead. Ignored for non-ollama providers.
-      OPEN_PAXEL_OLLAMA_BASE_URL: "${OPEN_PAXEL_OLLAMA_BASE_URL:-http://ollama:11434/v1}"
+      # default. This `environment:` value overrides env_file, so a localhost
+      # OPEN_PAXEL_OLLAMA_BASE_URL in .env (correct for non-Docker dev) can't
+      # leak in and break the bundled service. To use a host-installed Ollama
+      # instead, set OPEN_PAXEL_DOCKER_OLLAMA_BASE_URL in .env (e.g.
+      # http://host.docker.internal:11434/v1). Ignored for non-ollama providers.
+      OPEN_PAXEL_OLLAMA_BASE_URL: "${OPEN_PAXEL_DOCKER_OLLAMA_BASE_URL:-http://ollama:11434/v1}"
     ports:
       - "3847:3847"
     volumes:

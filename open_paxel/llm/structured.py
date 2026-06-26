@@ -44,6 +44,7 @@ async def _parse_with_json_fallback(
     model: str,
     messages: list[dict[str, str]],
     response_model: type[BaseModel],
+    max_tokens: int | None = None,
 ) -> BaseModel | None:
     schema_messages = _json_schema_messages(messages, response_model)
     try:
@@ -51,11 +52,13 @@ async def _parse_with_json_fallback(
             model=model,
             messages=schema_messages,
             response_format={"type": "json_object"},
+            max_tokens=max_tokens,
         )
     except Exception:
         completion = await client.chat.completions.create(
             model=model,
             messages=schema_messages,
+            max_tokens=max_tokens,
         )
 
     content = completion.choices[0].message.content or ""
@@ -74,12 +77,14 @@ async def parse_structured_completion(
 ) -> BaseModel | None:
     """Structured LLM output via OpenAI parse API or JSON fallback."""
     provider = settings.llm_provider.lower()
+    max_tokens = settings.max_output_tokens
 
     if provider == "openai":
         completion = await client.beta.chat.completions.parse(
             model=model,
             messages=messages,
             response_format=response_model,
+            max_tokens=max_tokens,
         )
         return completion.choices[0].message.parsed
 
@@ -89,6 +94,7 @@ async def parse_structured_completion(
                 model=model,
                 messages=messages,
                 response_format=response_model,
+                max_tokens=max_tokens,
             )
             parsed = completion.choices[0].message.parsed
             if parsed is not None:
@@ -100,6 +106,7 @@ async def parse_structured_completion(
             model=model,
             messages=messages,
             response_model=response_model,
+            max_tokens=max_tokens,
         )
 
     return await _parse_with_json_fallback(
@@ -107,4 +114,5 @@ async def parse_structured_completion(
         model=model,
         messages=messages,
         response_model=response_model,
+        max_tokens=max_tokens,
     )

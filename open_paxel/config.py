@@ -92,6 +92,19 @@ class Settings(BaseSettings):
     )
     model: str = "gpt-4.1-mini"
     concurrency: int = 3
+    # Cap on response tokens per LLM call. Reasoning models (e.g. qwen3) spend a
+    # large share on hidden reasoning, so the default must leave room for both the
+    # reasoning trace AND the JSON answer, or content comes back empty.
+    max_output_tokens: int = 8000
+    # When a transcript's estimated tokens exceed this, condense it via a chunked
+    # running-summary before scoring instead of sending the raw (overflowing) text.
+    condense_over_est_tokens: int = 40_000
+    # Chunk size in CHARACTERS (not estimated tokens — estimate_tokens under-counts
+    # dense JSONL ~6x, so sizing by chars is the safe, deterministic choice).
+    condense_chunk_chars: int = 120_000
+    # Cap on condenser chunks. Beyond this, representative chunks are sampled
+    # (first, last, evenly spaced) so a multi-million-token session stays bounded.
+    condense_max_chunks: int = 12
     redaction_level: str = "standard"
     dry_run: bool = False
     ephemeral_jobs: bool = False
@@ -185,6 +198,18 @@ openai_api_key = "{api_key}"
 model = "gpt-4.1-mini"
 concurrency = 3
 redaction_level = "standard"
+
+# Max response tokens per LLM call. Reasoning models (e.g. qwen3) spend a large
+# share on hidden reasoning, so leave room for the reasoning trace AND the JSON
+# answer, or content can come back empty.
+max_output_tokens = 8000
+
+# Long transcripts are condensed into a running summary before scoring so they
+# fit local-model context windows. Size chunks to ~half your model context (in
+# characters) and cap chunk count to bound latency on huge sessions.
+condense_over_est_tokens = 40000
+condense_chunk_chars = 120000
+condense_max_chunks = 12
 ''',
         encoding="utf-8",
     )

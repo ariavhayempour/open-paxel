@@ -91,7 +91,11 @@ class Settings(BaseSettings):
         default="http://localhost:11434/v1",
         validation_alias=AliasChoices("OPEN_PAXEL_OLLAMA_BASE_URL", "OLLAMA_HOST"),
     )
-    model: str = "gpt-4.1-mini"
+    # Empty means "pick the provider's default" — see effective_model(). Keeping
+    # this unset (rather than hardcoding an OpenAI model) lets OPEN_PAXEL_MODEL be
+    # the single source of truth, so e.g. the bundled-Ollama container pulls and
+    # the app requests the same model even when the user leaves it unset.
+    model: str = ""
     concurrency: int = 3
     redaction_level: str = "standard"
     dry_run: bool = False

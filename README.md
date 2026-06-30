@@ -107,7 +107,7 @@ This also starts a bundled Ollama container and, on first run, pulls the model n
 `OPEN_PAXEL_MODEL` into a persistent volume — no API key needed. `OPEN_PAXEL_MODEL` is the
 single source of truth: it selects both the model the app uses and the one pulled. To use
 an Ollama already installed on your host instead, set
-`OPEN_PAXEL_OLLAMA_BASE_URL=http://host.docker.internal:11434/v1` in `.env` and skip the profile.
+`OPEN_PAXEL_DOCKER_OLLAMA_BASE_URL=http://host.docker.internal:11434/v1` in `.env` and skip the profile.
 
 ### Lifecycle
 

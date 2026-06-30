@@ -55,7 +55,11 @@ def _resolve_path(path: Path) -> Path:
 
 
 def _claude_encoded_key(path: Path) -> str:
-    """Fingerprint matching Claude's ~/.claude/projects folder names."""
+    """Fingerprint matching Claude's ~/.claude/projects folder names.
+
+    Windows drives encode as ``c--users-name``; POSIX roots encode with a
+    single leading dash, e.g. ``/Users/surya`` -> ``-Users-surya``.
+    """
     resolved = _resolve_path(path)
     path_str = str(resolved)
     if _is_windows_path(path_str):
@@ -71,8 +75,10 @@ def _claude_encoded_key(path: Path) -> str:
     parts = list(resolved.parts)
     if not parts:
         return ""
-    drive = parts[0][0].lower()
     segments = [part.replace(" ", "-").replace("_", "-").lower() for part in parts[1:]]
+    if parts[0] == "/":  # POSIX root
+        return "-" + "-".join(segments)
+    drive = parts[0][0].lower()  # Windows drive letter
     return f"{drive}--" + "-".join(segments)
 
 
@@ -113,7 +119,11 @@ def _is_user_home_false_positive(repo_norm: str, cwd_norm: str) -> bool:
     if repo_norm == cwd_norm:
         return False
     parts = [p for p in repo_norm.split("\\") if p]
-    return len(parts) == 3 and parts[1] == "users"
+    # Windows user home: C:\Users\name -> (drive, "users", name)
+    if len(parts) == 3 and parts[1] == "users":
+        return True
+    # POSIX user home: /Users/name or /home/name -> ("users"|"home", name)
+    return len(parts) == 2 and parts[0] in ("users", "home")
 
 
 def _paths_match(repo_path: str, cwd_variants: list[str]) -> bool:

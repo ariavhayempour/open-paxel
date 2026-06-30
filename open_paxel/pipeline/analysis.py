@@ -8,8 +8,10 @@ from open_paxel.metrics.heuristics import blend_dimension, compute_heuristics
 from open_paxel.models.domain import DIMENSIONS, DimensionScore, SessionReport
 from open_paxel.parser.auto import AutoTranscriptParser
 from open_paxel.redact.excerpts import build_excerpts
+from open_paxel.redact.transcript import read_full_transcript
 from open_paxel.scorer.registry import get_scorer
 from open_paxel.scorer.session_narrative import generate_session_narrative
+from open_paxel.scorer.transcript_condenser import condense_transcript, needs_condensing
 from open_paxel.pipeline.steps.steering_traces import attach_steering_traces
 from open_paxel.config import Settings
 
@@ -57,6 +59,21 @@ class AnalysisPipeline:
         session_narrative = None
         llm_score = None
         if facts.analyzable:
+            # Oversized transcripts overflow local-model context windows. Condense
+            # the full session into a running summary so scoring sees the whole
+            # session instead of a truncated head (or a failed/empty LLM call).
+            full_text = read_full_transcript(facts)
+            if needs_condensing(full_text, self.settings):
+                summary, chunk_count = await condense_transcript(full_text, self.settings)
+                if summary:
+                    excerpts = excerpts.model_copy(
+                        update={
+                            "raw_transcript": summary,
+                            "accumulated_summary": summary,
+                            "chunk_count": chunk_count,
+                            "metrics_json": {**excerpts.metrics_json, "condensed": True},
+                        }
+                    )
             session_narrative = await generate_session_narrative(
                 facts, metrics, excerpts, self.settings
             )
